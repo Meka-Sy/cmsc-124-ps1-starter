@@ -10,7 +10,7 @@ toolchains, and local verification details for the work that the manual defines.
 Replace the two entries below. An assigned trio adds one entry.
 
 - Meka Synova Z. Melicor (`@Meka-Sy`)
-- Full Name (`@github-username`)
+- Claire Dane D. Vincoy (`@cdvincoy`)
 
 ## Files You May Change
 

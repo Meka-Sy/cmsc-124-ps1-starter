@@ -37,11 +37,34 @@ dt_str *dt_str_new(const char *bytes, size_t length)
        dt_str_new("hello", 5)  -> a string whose dt_str_len is 5
        dt_str_new("a\0b", 3)   -> a string whose dt_str_len remains 3
        cases/normal/string_building.case, cases/capacity/embedded_zero_byte.case */
-    (void)bytes;
-    (void)length;
-    return NULL;
-}
+       size_t capacity = length + 1; /*one extra byte for a terminator, length is the SIZE_MAX*/
+       if (capacity == 0) { /*reject SIZE_MAX because of the terminator*/
+           return NULL;
+       }
 
+        dt_str *s = malloc(sizeof(dt_str));
+         if (s == NULL) { /*allocation failure*/
+              return NULL;
+        }
+        s->bytes = malloc(capacity); /*data plus terminator*/
+        if (s->bytes==NULL){
+            free(s); /*don't leak the handle  */
+            return NULL;
+        }
+        if (length > 0) {
+            memcpy(s->bytes, bytes, length); /*copy the data*/
+        }
+        s->bytes[length] = '\0'; /*store a terminator after the data*/
+        s->length = length; /*store the length*/
+        s->capacity = capacity; /*store the capacity*/
+        return s;
+    
+}
+/*
+(void)bytes;
+    (void)length;
+    return NULL;}
+*/
 /*
  * dt_str_free releases the buffer and handle. It accepts NULL.
  */
@@ -50,6 +73,7 @@ void dt_str_free(dt_str *s)
     /* TODO: Release the buffer. Then release the handle. Accept NULL.
        dt_str_free(s)     -> the buffer and the handle are both released
        dt_str_free(NULL)  -> returns, having done nothing */
+    
     (void)s;
 }
 

@@ -27,22 +27,12 @@ bool dt_enum_is_valid(int ordinal)
        dt_enum_is_valid(3)   -> false, one past the set
        dt_enum_is_valid(-1)  -> false, below the lower bound */
 
-    if (ordinal >=0 && ordinal < DT_COLOR_COUNT){    // Instead of separate checking, a range check is simpler to implement.
+    if (ordinal >=0 && ordinal < DT_COLOR_COUNT){    // Instead of separate checking, checking a range is simpler to implement.
+    // 0-2 is the accepted range.
         return true;
     } else {
         return false;
     }
-
-    // Initial implementation, checking each valid ordinal separately
-    // if (ordinal == DT_COLOR_COUNT-3){             // for red
-    //     return true;
-    // } else if (ordinal == DT_COLOR_COUNT-2){      // for green
-    //     return true;
-    // } else if (ordinal == DT_COLOR_COUNT-1){       // for blue
-    //     return true;
-    // } else {
-    //     return false;
-    // }
 }
 
 /*

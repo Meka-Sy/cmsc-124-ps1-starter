@@ -200,13 +200,30 @@ dt_status dt_str_substr(const dt_str *s, size_t start, size_t length, dt_str **o
          dt_str_substr(s, 3, 5, &out)  -> DT_ERR_RANGE, *out untouched
        an allocation failure           -> DT_ERR_CAPACITY, *out untouched
        cases/boundary/substr_exact_end.case, cases/boundary/substr_past_end.case */
-    (void)s;
+    if (s == NULL || out == NULL) {
+        return DT_ERR_RANGE; /*invalid input*/
+    }
+    size_t len = dt_str_len(s);
+
+    if( start > len || length > len - start) {
+        return DT_ERR_RANGE; /*requested range exceeds source*/
+    }
+    dt_str *result = NULL;
+    dt_status st = dt_str_new_n(dt_str_bytes(s) + start, length, &result);
+    if (st != DT_OK) {
+        return DT_ERR_CAPACITY; /*allocation failure*/
+    }
+    *out = result; /*set the output pointer*/
+    return DT_OK;
+
+}
+/*
+(void)s;
     (void)start;
     (void)length;
     (void)out;
     return DT_ERR_RANGE;
-}
-
+    */
 /*
  * dt_str_eq reports whether both strings hold the same bytes.
  * The stored lengths let the comparison include embedded zero bytes.
@@ -219,7 +236,20 @@ bool dt_str_eq(const dt_str *a, const dt_str *b)
        "hello" and "world"  -> false
        "a\0b" and "a"       -> false because their lengths are 3 and 1
        cases/normal/string_building.case, cases/capacity/embedded_zero_byte.case */
-    (void)a;
+    if (a == NULL || b == NULL) {
+        return false; /*invalid input*/
+    }
+    if (dt_str_len(a) != dt_str_len(b)) {
+        return false; /*different lengths*/
+    }
+    if (dt_str_len(a) == 0) {
+        return true; /*both are empty strings*/
+    }
+    return memcmp(dt_str_bytes(a), dt_str_bytes(b), dt_str_len(a)) == 0;
+}
+
+/*
+ (void)a;
     (void)b;
     return false;
-}
+    */

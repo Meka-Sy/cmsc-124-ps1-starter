@@ -208,9 +208,8 @@ dt_status dt_str_substr(const dt_str *s, size_t start, size_t length, dt_str **o
     if( start > len || length > len - start) {
         return DT_ERR_RANGE; /*requested range exceeds source*/
     }
-    dt_str *result = NULL;
-    dt_status st = dt_str_new_n(dt_str_bytes(s) + start, length, &result);
-    if (st != DT_OK) {
+    dt_str *result= dt_str_new(dt_str_bytes(s) + start, length);
+    if (result  == NULL) {
         return DT_ERR_CAPACITY; /*allocation failure*/
     }
     *out = result; /*set the output pointer*/

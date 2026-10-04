@@ -29,7 +29,7 @@ struct dt_str {
  * dt_str_new copies the first `length` bytes. A zero byte is data. The function
  * returns NULL when allocation or size representation fails.
  */
-dt_str *dt_str_new(const char *bytes, size_t length)
+dt_str *dt_str_new(const char *bytes, size_t length) //implemented
 {
     /* TODO: Reject SIZE_MAX because the buffer needs one terminator byte.
        Allocate the handle and buffer. Copy `length` bytes with memcpy.
@@ -68,7 +68,7 @@ dt_str *dt_str_new(const char *bytes, size_t length)
 /*
  * dt_str_free releases the buffer and handle. It accepts NULL.
  */
-void dt_str_free(dt_str *s)
+void dt_str_free(dt_str *s) //implemented
 {
     /* TODO: Release the buffer. Then release the handle. Accept NULL.
        dt_str_free(s)     -> the buffer and the handle are both released
@@ -85,30 +85,42 @@ void dt_str_free(dt_str *s)
 /*
  * dt_str_len returns the stored byte count in constant time.
  */
-size_t dt_str_len(const dt_str *s)
+size_t dt_str_len(const dt_str *s) //implemented
 {
     /* TODO: Return the stored length. Do not scan the bytes.
        after `str new greeting "hello"` then `str append greeting ", world"`:
          dt_str_len(greeting) -> 12
        cases/normal/string_building.case */
-    (void)s;
-    return 0;
-}
+    if (s == NULL) {
+        return 0; /*return 0 for NULL string*/
+    }
+    return s->length; /*return the stored length*/
 
+}
+/*
+(void)s;
+    return 0;
+*/
 /*
  * dt_str_bytes returns the string bytes. Internal storage can include a final
  * zero byte. Callers must use dt_str_len with this pointer.
  */
-const char *dt_str_bytes(const dt_str *s)
+const char *dt_str_bytes(const dt_str *s) //implemented
 {
     /* TODO: Return the buffer. The caller uses it with dt_str_len.
        after `str new s "a\0b"`:
          dt_str_bytes(s) -> the three bytes 'a', 0, 'b'
          dt_str_len(s)   -> 3, the required read length
        cases/capacity/embedded_zero_byte.case */
-    (void)s;
-    return "";
+    if (s == NULL || s->bytes == NULL) {
+        return "";
+    }
+    return s->bytes;
 }
+/*
+ (void)s;
+    return "";
+    */
 
 /*
  * dt_str_append adds `length` bytes and grows the buffer when necessary. It
@@ -124,12 +136,53 @@ dt_status dt_str_append(dt_str *s, const char *bytes, size_t length)
        s holds "hello": dt_str_append(s, ", world", 7) -> DT_OK, len is now 12
        an allocation failure                           -> DT_ERR_CAPACITY, s unchanged
        cases/normal/string_building.case, cases/capacity/string_growth.case */
-    (void)s;
+    if (s == NULL || (bytes == NULL && length > 0)) {
+        return DT_ERR_CAPACITY; /*invalid input*/
+    }
+
+
+    if (length > SIZE_MAX - 1 - s->length) {
+        return DT_ERR_CAPACITY; /*length + terminator would wrap*/
+    }
+
+    size_t new_length = s->length + length;
+    size_t needed = new_length + 1; /*new length plus terminator*/
+
+    if (needed > s->capacity) {
+        int aliased = (s->bytes != NULL && bytes >= s->bytes && bytes < s->bytes + s->capacity);
+        size_t offset = aliased ? (size_t)(bytes - s->bytes):0;
+
+        size_t new_capacity = s->capacity;
+        while (new_capacity < needed) {
+            if (new_capacity > (SIZE_MAX - 1) / 2) {
+                new_capacity = needed; /*cannot double*/
+                break;
+            }
+            new_capacity = 2 * new_capacity + 1;
+        }
+        char *p = realloc(s->bytes, new_capacity);
+        if (p == NULL) {
+            return DT_ERR_CAPACITY; /*allocation failure*/
+        }
+        s->bytes = p;
+        s->capacity = new_capacity;
+        if (aliased) {
+            bytes = s->bytes + offset; /*update pointer after realloc*/
+        }
+    }
+    if (length > 0) {
+        memcpy(s->bytes + s->length, bytes, length); /*copy the new bytes*/
+    }
+    s->length = new_length; /*update the length*/
+    s->bytes[s->length] = '\0'; /*store the terminator*/
+    return DT_OK;
+}
+/*
+(void)s;
     (void)bytes;
     (void)length;
     return DT_ERR_CAPACITY;
-}
-
+*/
 /*
  * dt_str_substr builds a new string from length bytes at start.
  * It returns DT_ERR_RANGE when the requested range exceeds the source.

@@ -73,10 +73,15 @@ void dt_str_free(dt_str *s)
     /* TODO: Release the buffer. Then release the handle. Accept NULL.
        dt_str_free(s)     -> the buffer and the handle are both released
        dt_str_free(NULL)  -> returns, having done nothing */
-    
-    (void)s;
+    if (s == NULL) {
+        return;
+    }
+    free(s->bytes); /*release the buffer*/
+    free(s); /*release the handle*/
 }
-
+/*
+ (void)s;
+*/
 /*
  * dt_str_len returns the stored byte count in constant time.
  */

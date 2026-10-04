@@ -17,6 +17,7 @@
 #include "dt.h"
 
 #include <limits.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -25,7 +26,18 @@ struct dt_array {
     size_t    length;
     long long lower_bound;
 };
-
+static bool array_offset(const dt_array *a, long long index, size_t *offset)
+{
+    if (index < a->lower_bound) {
+        return false; /*index below lower bound*/
+    }
+    unsigned long long distance = (unsigned long long)index - (unsigned long long)a->lower_bound;
+    if (distance >= a->length) {
+        return false; /*index above upper bound*/
+    }
+    *offset = (size_t)distance; /*convert to size_t for the element offset*/
+    return true; /*valid index, offset calculated*/
+}
 /*
  * dt_array_new builds an array of length nil elements.
  * The first index is lower_bound. A zero length creates a valid empty array.
@@ -140,6 +152,8 @@ long long dt_array_lower_bound(const dt_array *a)
  * dt_array_get writes the element at index to *out.
  * It returns DT_ERR_RANGE and does not change *out for an invalid index.
  */
+
+
 dt_status dt_array_get(const dt_array *a, long long index, dt_value *out)
 {
     /* TODO: Reject an index below the lower bound.
@@ -172,18 +186,6 @@ dt_status dt_array_get(const dt_array *a, long long index, dt_value *out)
  * It returns DT_ERR_RANGE and changes nothing for an invalid index.
  * The environment keeps ownership of the old value.
  */
-static bool array_offset(const dt_array *a, long long index, size_t *offset)
-{
-    if (index < a->lower_bound) {
-        return false; /*index below lower bound*/
-    }
-    unsigned long long distance = (unsigned long long)index - (unsigned long long)a->lower_bound;
-    if (distance >= a->length) {
-        return false; /*index above upper bound*/
-    }
-    *offset = (size_t)distance; /*convert to size_t for the element offset*/
-    return true; /*valid index, offset calculated*/
-}
 
 
 dt_status dt_array_set(dt_array *a, long long index, dt_value v)

@@ -38,8 +38,11 @@ dt_list *dt_list_nil(void)
        dt_list_len(dt_list_nil()) -> 0
        cases/normal/list_basics.case */
     return NULL;
-}
 
+}
+/*
+    return NULL;
+*/
 /*
  * dt_list_cons builds a new cell that holds head and references tail.
  * The new cell shares the supplied tail.
@@ -81,10 +84,16 @@ size_t dt_list_len(const dt_list *l)
        for a = (1 2 3):  dt_list_len(a) -> 3
        for the empty list: dt_list_len(NULL) -> 0
        cases/normal/list_basics.case */
-    (void)l;
-    return 0;
+    size_t n = 0;
+    while (l != NULL) {
+        n++;
+        l = l->tail;
+    }
+    return n;
 }
-
+/*
+(void)l;
+    return 0;*/
 /*
  * dt_list_car writes the first cell value to *out.
  * It returns DT_ERR_EMPTY and does not change *out for an empty list.

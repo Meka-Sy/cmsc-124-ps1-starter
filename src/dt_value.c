@@ -107,13 +107,6 @@ dt_status dt_value_as_int(dt_value v, long long *out)
     return DT_OK;
 }
 /*
-
-    (void)v;
-    (void)out;
-    return DT_ERR_TAG;
-*/
-
-/*
  * dt_value_as_enum validates DT_ENUM and writes its ordinal to *out.
  */
 dt_status dt_value_as_enum(dt_value v, int *out)
@@ -127,13 +120,7 @@ dt_status dt_value_as_enum(dt_value v, int *out)
     }
     *out = v.as.ordinal; /*tag confirmed, so the ordinal is live*/
     return DT_OK;
-
 }
-/*
- (void)v;
-    (void)out;
-    return DT_ERR_TAG;
-*/
 
 /*
  * dt_value_as_str validates DT_STR and writes its pointer to *out.
@@ -151,8 +138,3 @@ dt_status dt_value_as_str(dt_value v, dt_str **out)
     *out = v.as.string; /*tag confirmed, so the string pointer is live*/
     return DT_OK;
 }
-
-/*
- (void)v;
-    (void)out;
-    return DT_ERR_TAG;*/

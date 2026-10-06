@@ -17,6 +17,7 @@
 #include "dt.h"
 
 #include <limits.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -25,7 +26,18 @@ struct dt_array {
     size_t    length;
     long long lower_bound;
 };
-
+static bool array_offset(const dt_array *a, long long index, size_t *offset) //the helper mentioned in dt_array_set
+{
+    if (index < a->lower_bound) {
+        return false; /*index below lower bound*/
+    }
+    unsigned long long distance = (unsigned long long)index - (unsigned long long)a->lower_bound;
+    if (distance >= a->length) {
+        return false; /*index above upper bound*/
+    }
+    *offset = (size_t)distance; /*convert to size_t for the element offset*/
+    return true; /*valid index, offset calculated*/
+}
 /*
  * dt_array_new builds an array of length nil elements.
  * The first index is lower_bound. A zero length creates a valid empty array.
@@ -43,43 +55,69 @@ dt_array *dt_array_new(size_t length, long long lower_bound)
        dt_array_new(0, 0)   -> an empty array
        cases/normal/array_basics.case, cases/boundary/array_empty.case,
        cases/boundary/array_negative_lower_bound.case */
-    (void)length;
-    (void)lower_bound;
-    return NULL;
+    if (length > SIZE_MAX / sizeof(dt_value)) {
+        return NULL; //size exceeds SIZE_MAX
+    }
+    if (length> 0){
+        unsigned long long room = (unsigned long long)LLONG_MAX - (unsigned long long)lower_bound;
+        if ((unsigned long long) (length -1) > room){
+            return NULL; //unrepresentable final index
+        }
+    }
+    dt_array *a = malloc(sizeof(dt_array));
+    if (a == NULL) {
+        return NULL; //allocation failure
+    }
+    a->length = length; //assigning of value to length 
+    a->lower_bound = lower_bound; //assigning of value to lower_bound
+    a->elements = NULL; //assigning NULL to elements pointer
+    if (length > 0) { //this will execute as long as length will be greater than 0
+        a->elements = malloc(length * sizeof(dt_value)); //allocate memory 
+        if (a->elements == NULL) { //if allocation failes
+            free(a); //don't leak the descriptor*/
+            return NULL; //allocation failure
+        }
+        for (size_t i = 0; i < length; ++i) {
+            a->elements[i] = dt_value_nil(); //initialize each element to nil
+        }
+    }
+    return a; //return the pointer 
 }
-
 /*
  * dt_array_free releases the element block and descriptor. It accepts NULL.
  * The environment owns the runtime objects referenced by the dt_value elements.
  */
-void dt_array_free(dt_array *a)
+void dt_array_free(dt_array *a) //this will release the element/descriptor
 {
     /* TODO: Release the elements. Then release the descriptor.
        Preserve the referenced values. The driver environment owns them.
        an array holding a string  -> the element block goes, the string stays
        dt_array_free(NULL)        -> returns, having done nothing */
-    (void)a;
+    if (a == NULL){ //if a is NULL, nothing is done 
+        return;
+    } 
+    free(a->elements); //release the element block
+    free(a); //release the descriptor
 }
-
 /*
  * dt_array_len returns the stored element count in constant time.
  */
-size_t dt_array_len(const dt_array *a)
+size_t dt_array_len(const dt_array *a) //returns the length of the array
 {
     /* TODO: Return the stored length. The lower bound does not affect it.
        after `arr new a 3 0`:   dt_array_len(a) -> 3
        after `arr new a 3 -1`:  dt_array_len(a) -> 3, the same three elements
        after `arr new a 0 0`:   dt_array_len(a) -> 0
        cases/normal/array_basics.case, cases/boundary/array_empty.case */
-    (void)a;
-    return 0;
+    if (a == NULL) {
+        return 0; //return 0 for NULL array
+    }
+    return a->length; //return the stored length
 }
-
-/*
- * dt_array_lower_bound returns the first array index. With lower bound 1,
+/* dt_array_lower_bound returns the first array index. With lower bound 1,
  * index 1 uses storage offset 0.
  */
-long long dt_array_lower_bound(const dt_array *a)
+long long dt_array_lower_bound(const dt_array *a) //returns the lower bound of the array
 {
     /* TODO: Return the lower bound that the constructor stored.
        dt_array_get uses this value to calculate an element offset.
@@ -87,10 +125,11 @@ long long dt_array_lower_bound(const dt_array *a)
        after `arr new a 3 1`:   dt_array_lower_bound(a) -> 1
        cases/boundary/array_negative_lower_bound.case,
        cases/boundary/array_lower_bound_one.case */
-    (void)a;
-    return 0;
+    if (a == NULL) {
+        return 0; //return 0 for NULL array
+    }
+    return a->lower_bound; //return the stored lower bound
 }
-
 /*
  * dt_array_get writes the element at index to *out.
  * It returns DT_ERR_RANGE and does not change *out for an invalid index.
@@ -109,12 +148,13 @@ dt_status dt_array_get(const dt_array *a, long long index, dt_value *out)
        cases/boundary/array_index_above_upper.case,
        cases/boundary/array_index_below_lower.case,
        cases/boundary/array_full_range_index.case */
-    (void)a;
-    (void)index;
-    (void)out;
-    return DT_ERR_RANGE;
+    size_t offset; //initialize for an offset to a variable
+    if (a == NULL || out == NULL || !array_offset(a, index, &offset)) { //checks if whether a or out is NULL or if array_offset is out of bounds
+        return DT_ERR_RANGE; //invalid input
+    }
+    *out = a->elements[offset]; /*write the element to the output pointer*/
+    return DT_OK; // the purpose of this function is executed
 }
-
 /*
  * dt_array_set replaces the element at index with v.
  * It returns DT_ERR_RANGE and changes nothing for an invalid index.
@@ -128,8 +168,10 @@ dt_status dt_array_set(dt_array *a, long long index, dt_value v)
          dt_array_set(a, -1, dt_value_int(10))  -> DT_OK, offset 0 holds 10
          dt_array_set(a,  2, dt_value_int(10))  -> DT_ERR_RANGE, nothing changes
        cases/normal/array_basics.case, cases/boundary/array_negative_lower_bound.case */
-    (void)a;
-    (void)index;
-    (void)v;
-    return DT_ERR_RANGE;
+    size_t offset; //initialize for an offset to a variable
+    if (a == NULL || !array_offset(a, index, &offset)) { //if a is NULL or if the index is invalid
+        return DT_ERR_RANGE; //invalid input
+    }
+    a->elements[offset] = v; //replace the element at the offset
+    return DT_OK;  // the purpose of this function is executed
 }

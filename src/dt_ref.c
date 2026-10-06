@@ -40,8 +40,31 @@ dt_ref *dt_ref_new(dt_value v)
        dt_ref_new(dt_value_int(42))  -> a reference that prints as ref(42)
        an allocation failure          -> NULL
        cases/ownership/ref_released.case */
-    (void)v;
-    return NULL;
+
+    // Allocate memory for the reference handle
+    dt_ref *p = malloc(sizeof(dt_ref));
+
+    // Return null if the handle allocation failed
+    if (p == NULL){
+        return NULL;
+    }
+
+    // Allocate the memory for the cell owned by the reference
+    p -> cell = malloc(sizeof(dt_value));
+
+    // If the cell allocation fails, free the handle before returning
+    if (p->cell ==NULL){
+        free(p);
+        return NULL;
+    }
+
+    // Copy the value into the newly allocated cell
+    *(p->cell) = v;
+
+    // Mark the reference as not released when it is first created
+    p->released = false;
+
+    return p;
 }
 
 /*
@@ -59,9 +82,15 @@ dt_status dt_ref_borrow(const dt_ref *p, dt_value *out)
                                                           *out untouched
        cases/ownership/ref_released.case,
        cases/post-release/borrow_after_release.case */
-    (void)p;
-    (void)out;
-    return DT_ERR_RELEASED;
+    
+    // Check if the reference has already been released
+    if (p->released){
+        return DT_ERR_RELEASED;
+    }
+
+    // Copy the value from the owned cell to *out
+    *out = *(p->cell);
+    return DT_OK;
 }
 
 /*
@@ -79,8 +108,22 @@ dt_status dt_ref_release(dt_ref *p)
        a reference holding a string     -> releases the cell and preserves the string
        cases/ownership/ref_double_release.case,
        cases/ownership/ref_aliases_string.case */
-    (void)p;
-    return DT_ERR_RELEASED;
+
+    // Check if the reference has already been released
+    if (p->released){
+        return DT_ERR_RELEASED;
+    }
+
+    // Free the memory owned by the reference's cell
+    free(p->cell);
+
+    // Remove the cell address after freeing the cell
+    p->cell = NULL;
+
+    // Mark the reference as released to prevent later access
+    p->released = true;
+
+    return DT_OK;
 }
 
 /*
@@ -95,8 +138,9 @@ bool dt_ref_is_released(const dt_ref *p)
        a live reference        -> false, so the driver reports DT_ERR_LEAK
        after dt_ref_release(p) -> true, so the driver reports no leak
        cases/ownership/ref_never_released.case, cases/ownership/ref_released.case */
-    (void)p;
-    return true;
+    
+    // Return the current release state of the reference
+    return p->released;
 }
 
 /*
@@ -111,5 +155,19 @@ void dt_ref_destroy(dt_ref *p)
        a released reference  -> only the handle is left to free
        a live reference      -> the cell and the handle both go, quietly
        dt_ref_destroy(NULL)  -> returns, having done nothing */
-    (void)p;
+    
+    // Check if there is no reference to destroy
+    if (p==NULL){
+        return;
+    }
+
+    // Release the cell only if it has not already been released
+    if (!p->released){
+        free(p->cell);
+        p->cell=NULL;
+        p->released = true;
+    }
+
+    // Free the reference handle itself
+    free(p);
 }

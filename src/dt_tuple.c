@@ -33,9 +33,30 @@ dt_tuple *dt_tuple_new(const dt_value *values, size_t count)
        count 9     -> NULL, since DT_TUPLE_MAX_ARITY is 8
        cases/normal/tuple_basics.case, cases/capacity/tuple_max_arity.case,
        cases/capacity/tuple_over_arity.case */
-    (void)values;
-    (void)count;
-    return NULL;
+
+    // Check if the requested number of values exceeds the maximum arity
+    if (count > DT_TUPLE_MAX_ARITY){
+        return NULL;
+    }
+
+    // ALlocate memory for the new tuple
+    dt_tuple *t = malloc(sizeof(*t));
+
+    // Return null if the allication fails
+    if (t == NULL){
+        return NULL;
+    }
+
+    // Copy each values into the tuple in the same order given
+    for (size_t i = 0; i<count; i++){
+        t->values[i] = values[i];
+    }
+
+    // Store the number of values in the tuple
+    t->arity=count;
+
+    // Return the newly created tuple
+    return t;
 }
 
 /*
@@ -48,7 +69,14 @@ void dt_tuple_free(dt_tuple *t)
        The environment owns those values. dt_array_free follows the same rule.
        a tuple holding a string  -> the tuple goes, the string stays
        dt_tuple_free(NULL)       -> returns, having done nothing */
-    (void)t;
+
+    // Check if there is no tuple to release
+   if (t == NULL){
+        return;
+    }
+
+    // Free the memory used by the tuple itself 
+    free(t);
 }
 
 /*
@@ -61,8 +89,9 @@ size_t dt_tuple_arity(const dt_tuple *t)
        after `tup new pair 1 "two"`:  dt_tuple_arity(pair) -> 2
        after `tup new empty`:         dt_tuple_arity(empty) -> 0
        cases/normal/tuple_basics.case */
-    (void)t;
-    return 0;
+
+    // Return the number of values stored in the tuple
+    return t->arity;
 }
 
 /*
@@ -76,8 +105,15 @@ dt_status dt_tuple_at(const dt_tuple *t, size_t index, dt_value *out)
          dt_tuple_at(t, 0, &out)  -> DT_OK, *out is the integer 1
          dt_tuple_at(t, 2, &out)  -> DT_ERR_RANGE, *out untouched
        cases/normal/tuple_basics.case, cases/boundary/tuple_index_past_arity.case */
-    (void)t;
-    (void)index;
-    (void)out;
-    return DT_ERR_RANGE;
+   
+    // Check if the requested position is outisde the tuple
+    if (index >= t->arity){
+        return DT_ERR_RANGE;
+    }
+
+    // Copy the value at the requested position into *out
+    *out = t->values[index];
+
+    // Return success after writing the value to *out
+    return DT_OK;
 }

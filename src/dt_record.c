@@ -65,11 +65,6 @@ dt_record *dt_record_new(const char **field_names, size_t field_count)
     return record;
 }
 /*
-(void)field_names;
-    (void)field_count;
-    return NULL;
-*/
-/*
  * dt_record_free releases the copied field names and the record.
  * It accepts NULL. The environment owns the field values.
  */
@@ -87,9 +82,6 @@ void dt_record_free(dt_record *r)
     free(r);
 }
 /*
- (void)r;
- */
-/*
  * dt_record_field_count returns the stored field count in constant time.
  */
 size_t dt_record_field_count(const dt_record *r)
@@ -101,11 +93,6 @@ size_t dt_record_field_count(const dt_record *r)
     
     return r->count;
 }
-/*
-(void)r;
-    return 0;
-    
-*/
 /*
  * dt_record_field_name writes the field name at declaration position index to *out.
  * It returns DT_ERR_RANGE and does not change *out for an invalid index.
@@ -124,14 +111,7 @@ dt_status dt_record_field_name(const dt_record *r, size_t index, const char **ou
     }
     *out = r->names[index];
     return DT_OK;
-
-    
 }
-/*
- (void)r;
-    (void)index;
-    (void)out;
-    return DT_ERR_RANGE;*/
 /*
  * dt_record_get writes the value of field to *out.
  * It returns DT_ERR_FIELD and does not change *out when the field is absent.
@@ -155,12 +135,6 @@ dt_status dt_record_get(const dt_record *r, const char *field, dt_value *out)
     return DT_ERR_FIELD;
 
 }
-/*
-(void)r;
-    (void)field;
-    (void)out;
-    return DT_ERR_FIELD;
-*/
 /*
  * dt_record_set replaces the value of field with v.
  * It returns DT_ERR_FIELD and changes nothing when the field is absent.
@@ -186,8 +160,3 @@ dt_status dt_record_set(dt_record *r, const char *field, dt_value v)
     return DT_ERR_FIELD;
 
 }
-/*
-(void)r;
-    (void)field;
-    (void)v;
-    return DT_ERR_FIELD;*/

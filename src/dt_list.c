@@ -37,12 +37,9 @@ dt_list *dt_list_nil(void)
        dt_list_nil()             -> the empty list, which prints as ()
        dt_list_len(dt_list_nil()) -> 0
        cases/normal/list_basics.case */
-    return NULL;
+    return NULL;//if list is empty, return NULL
 
 }
-/*
-    return NULL;
-*/
 /*
  * dt_list_cons builds a new cell that holds head and references tail.
  * The new cell shares the supplied tail.
@@ -57,12 +54,12 @@ dt_list *dt_list_cons(dt_value head, dt_list *tail)
        List b contains (2 3) and references the same cells for 2 and 3.
        an allocation failure -> NULL
        cases/normal/list_basics.case, cases/cleanup/shared_list_tail.case */
-    dt_list *new_cell = malloc(sizeof(dt_list));
-    if (new_cell == NULL) {
-        return NULL;
+    dt_list *new_cell = malloc(sizeof(dt_list)); //allocate memory for the new cell
+    if (new_cell == NULL) {//if new cell is NULL, to signify an allocation failure
+        return NULL; //return NULL
     }
-    new_cell->head = head;
-    new_cell->tail = tail;
+    new_cell->head = head; //the head value is to be stored in new_cell's head
+    new_cell->tail = tail; //the tail value is to be stored in new_cell's tail
     return new_cell;
 
 }
@@ -76,7 +73,7 @@ void dt_list_free(dt_list *l)
        freeing a's first cell  -> b still reaches the cells holding 2 and 3
        releasing the tail here causes the sanitizer to report a double release
        cases/cleanup/shared_list_tail.case */
-    if (l != NULL) {
+    if (l != NULL) { //if list is not NULL, then free the cell
         free(l);
     }
 
@@ -90,12 +87,12 @@ size_t dt_list_len(const dt_list *l)
        for a = (1 2 3):  dt_list_len(a) -> 3
        for the empty list: dt_list_len(NULL) -> 0
        cases/normal/list_basics.case */
-    size_t n = 0;
-    while (l != NULL) {
+    size_t n = 0; //initialize the counter for counting the number of visited cells 
+    while (l != NULL) { //while list is not null, increment the counter 
         n++;
-        l = l->tail;
+        l = l->tail; //move to the next cell
     }
-    return n;
+    return n; //return the counter 
 }
 /*
  * dt_list_car writes the first cell value to *out.
@@ -109,11 +106,11 @@ dt_status dt_list_car(const dt_list *l, dt_value *out)
        for a = (1 2 3):     dt_list_car(a, &out)    -> DT_OK, *out is 1
        for the empty list:  dt_list_car(NULL, &out) -> DT_ERR_EMPTY, *out untouched
        cases/normal/list_basics.case, cases/boundary/list_car_empty.case */
-    if (l == NULL) {
-        return DT_ERR_EMPTY;
+    if (l == NULL) {  // if the list is empty
+        return DT_ERR_EMPTY; //return DT_ERR_EMPTY
     }
-    *out = l->head;
-    return DT_OK;
+    *out = l->head; //writes the first cell's value to *out
+    return DT_OK; //return DT_OK
 }
 /*
  * dt_list_cdr writes the tail to *out. It returns DT_ERR_EMPTY for an empty
@@ -126,9 +123,9 @@ dt_status dt_list_cdr(const dt_list *l, dt_list **out)
        for a = (1 2 3):     dt_list_cdr(a, &out)    -> DT_OK, *out references tail b
        for the empty list:  dt_list_cdr(NULL, &out) -> DT_ERR_EMPTY, *out untouched
        cases/normal/list_basics.case, cases/boundary/list_cdr_empty.case */
-    if (l == NULL) {
-        return DT_ERR_EMPTY;
+    if (l == NULL) { //if list is empty 
+        return DT_ERR_EMPTY; //return DT_ERR_EMPTY when list is empty
     }
-    *out = l->tail;
-    return DT_OK;
+    *out = l->tail; //write the shared tail to *out
+    return DT_OK; //return DT_OK, as the purpose of the function is done
 }

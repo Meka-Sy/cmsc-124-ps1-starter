@@ -26,9 +26,13 @@ bool dt_enum_is_valid(int ordinal)
        dt_enum_is_valid(2)   -> true, BLUE
        dt_enum_is_valid(3)   -> false, one past the set
        dt_enum_is_valid(-1)  -> false, below the lower bound */
-    (void)ordinal;
-    (void)COLOR_NAMES; /* Delete this line after you use COLOR_NAMES. */
-    return false;
+
+    if (ordinal >=0 && ordinal < DT_COLOR_COUNT){    // Instead of separate checking, checking a range is simpler to implement.
+    // 0-2 is the accepted range.
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /*
@@ -44,9 +48,15 @@ dt_status dt_enum_name(int ordinal, const char **out)
        dt_enum_name(2, &out)  -> DT_OK, *out = "BLUE"
        dt_enum_name(3, &out)  -> DT_ERR_RANGE, *out untouched
        cases/normal/enum_names.case */
-    (void)ordinal;
-    (void)out;
-    return DT_ERR_RANGE;
+
+    if (dt_enum_is_valid(ordinal)){         // ordinal == "true", Validation checks if ordinal is within the range.
+            *out = COLOR_NAMES[ordinal];
+            return DT_OK;
+    } else {
+        // If it is out of range (0-2), it returns false.
+        // Example: ordinal(3) is >= 3 and ordinal(-1) < 0.
+        return DT_ERR_RANGE;
+    }
 }
 
 /*
@@ -60,7 +70,12 @@ dt_status dt_enum_from_name(const char *name, int *out)
        dt_enum_from_name("PURPLE", &out)  -> DT_ERR_RANGE, out untouched
        dt_enum_from_name("1", &out)       -> DT_ERR_RANGE because no text matches
        cases/normal/enum_names.case */
-    (void)name;
-    (void)out;
-    return DT_ERR_RANGE;
+
+    for (int i=0; i<3; i++){                        // A for loop is used to search within the list.
+        if (strcmp(name, COLOR_NAMES[i]) == 0) {    // strcmp compares two strings and returns 0 if they are equal
+            *out = i;                               // If found, it stores the position of the string in the list, which corresponds to the enum value.
+            return DT_OK;
+        }
+    } 
+    return DT_ERR_RANGE;                            // Returns an error if no text matches.
 }

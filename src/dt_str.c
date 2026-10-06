@@ -60,11 +60,7 @@ dt_str *dt_str_new(const char *bytes, size_t length) //implemented
         return s;
     
 }
-/*
-(void)bytes;
-    (void)length;
-    return NULL;}
-*/
+
 /*
  * dt_str_free releases the buffer and handle. It accepts NULL.
  */
@@ -79,9 +75,6 @@ void dt_str_free(dt_str *s) //implemented
     free(s->bytes); /*release the buffer*/
     free(s); /*release the handle*/
 }
-/*
- (void)s;
-*/
 /*
  * dt_str_len returns the stored byte count in constant time.
  */
@@ -98,10 +91,6 @@ size_t dt_str_len(const dt_str *s) //implemented
 
 }
 /*
-(void)s;
-    return 0;
-*/
-/*
  * dt_str_bytes returns the string bytes. Internal storage can include a final
  * zero byte. Callers must use dt_str_len with this pointer.
  */
@@ -117,11 +106,6 @@ const char *dt_str_bytes(const dt_str *s) //implemented
     }
     return s->bytes;
 }
-/*
- (void)s;
-    return "";
-    */
-
 /*
  * dt_str_append adds `length` bytes and grows the buffer when necessary. It
  * returns DT_ERR_CAPACITY when allocation or size representation fails.
@@ -178,12 +162,6 @@ dt_status dt_str_append(dt_str *s, const char *bytes, size_t length)
     return DT_OK;
 }
 /*
-(void)s;
-    (void)bytes;
-    (void)length;
-    return DT_ERR_CAPACITY;
-*/
-/*
  * dt_str_substr builds a new string from length bytes at start.
  * It returns DT_ERR_RANGE when the requested range exceeds the source.
  * It returns DT_ERR_CAPACITY after an allocation failure.
@@ -217,13 +195,6 @@ dt_status dt_str_substr(const dt_str *s, size_t start, size_t length, dt_str **o
 
 }
 /*
-(void)s;
-    (void)start;
-    (void)length;
-    (void)out;
-    return DT_ERR_RANGE;
-    */
-/*
  * dt_str_eq reports whether both strings hold the same bytes.
  * The stored lengths let the comparison include embedded zero bytes.
  */
@@ -246,9 +217,3 @@ bool dt_str_eq(const dt_str *a, const dt_str *b)
     }
     return memcmp(dt_str_bytes(a), dt_str_bytes(b), dt_str_len(a)) == 0;
 }
-
-/*
- (void)a;
-    (void)b;
-    return false;
-    */

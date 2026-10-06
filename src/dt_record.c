@@ -36,7 +36,7 @@ dt_record *dt_record_new(const char **field_names, size_t field_count)
        nine fields                  -> NULL, and the driver reports DT_ERR_CAPACITY
        cases/normal/record_basics.case, cases/capacity/record_max_fields.case,
        cases/capacity/record_over_fields.case */
-
+       
     struct dt_record *record = malloc(sizeof(struct dt_record));
     if (record == NULL) { //if record is NULL
         return NULL;//return NULL 
@@ -48,8 +48,9 @@ dt_record *dt_record_new(const char **field_names, size_t field_count)
         return NULL; //return NULL 
     }
     for (size_t i = 0; i < field_count; i++) { //loop through the fields
-        record->names[i] = strdup(field_names[i]); //copy each field name
-        if (record->names[i] == NULL) {
+        size_t len = strlen(field_names[i]) + 1;
+        record->names[i] = malloc(len);
+        if (record->names[i] == NULL) { /* handle failure, free earlier names */
             //the cleanup code to free the previous allocated names and the record itself
             for (size_t j = 0; j < i; j++) { //loop through the allocated names
                 free(record->names[j]); //free the allocated names
@@ -57,6 +58,7 @@ dt_record *dt_record_new(const char **field_names, size_t field_count)
             free(record); //free the record 
             return NULL; //return NULL
         }
+        memcpy(record->names[i], field_names[i], len);
         record->values[i] = dt_value_nil();// this is the one that sets each field to nil
     }
 

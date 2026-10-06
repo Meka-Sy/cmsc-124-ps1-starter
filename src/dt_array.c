@@ -56,12 +56,12 @@ dt_array *dt_array_new(size_t length, long long lower_bound)
        cases/normal/array_basics.case, cases/boundary/array_empty.case,
        cases/boundary/array_negative_lower_bound.case */
     if (length > SIZE_MAX / sizeof(dt_value)) {
-        return NULL; /*size exceeds SIZE_MAX*/
+        return NULL; //size exceeds SIZE_MAX
     }
     if (length> 0){
         unsigned long long room = (unsigned long long)LLONG_MAX - (unsigned long long)lower_bound;
         if ((unsigned long long) (length -1) > room){
-            return NULL; /*unrepresentable final index*/
+            return NULL; //unrepresentable final index
         }
     }
     dt_array *a = malloc(sizeof(dt_array));
@@ -96,8 +96,8 @@ void dt_array_free(dt_array *a) //this will release the element/descriptor
     if (a == NULL){ //if a is NULL, nothing is done 
         return;
     } 
-    free(a->elements); /*release the element block*/
-    free(a); /*release the descriptor*/
+    free(a->elements); //release the element block
+    free(a); //release the descriptor
 }
 /*
  * dt_array_len returns the stored element count in constant time.
@@ -110,9 +110,9 @@ size_t dt_array_len(const dt_array *a) //returns the length of the array
        after `arr new a 0 0`:   dt_array_len(a) -> 0
        cases/normal/array_basics.case, cases/boundary/array_empty.case */
     if (a == NULL) {
-        return 0; /*return 0 for NULL array*/
+        return 0; //return 0 for NULL array
     }
-    return a->length; /*return the stored length*/
+    return a->length; //return the stored length
 }
 /* dt_array_lower_bound returns the first array index. With lower bound 1,
  * index 1 uses storage offset 0.
@@ -126,9 +126,9 @@ long long dt_array_lower_bound(const dt_array *a) //returns the lower bound of t
        cases/boundary/array_negative_lower_bound.case,
        cases/boundary/array_lower_bound_one.case */
     if (a == NULL) {
-        return 0; /*return 0 for NULL array*/
+        return 0; //return 0 for NULL array
     }
-    return a->lower_bound; /*return the stored lower bound*/
+    return a->lower_bound; //return the stored lower bound
 }
 /*
  * dt_array_get writes the element at index to *out.
@@ -150,7 +150,7 @@ dt_status dt_array_get(const dt_array *a, long long index, dt_value *out)
        cases/boundary/array_full_range_index.case */
     size_t offset; //initialize for an offset to a variable
     if (a == NULL || out == NULL || !array_offset(a, index, &offset)) { //checks if whether a or out is NULL or if array_offset is out of bounds
-        return DT_ERR_RANGE; /*invalid input*/
+        return DT_ERR_RANGE; //invalid input
     }
     *out = a->elements[offset]; /*write the element to the output pointer*/
     return DT_OK; // the purpose of this function is executed
@@ -170,8 +170,8 @@ dt_status dt_array_set(dt_array *a, long long index, dt_value v)
        cases/normal/array_basics.case, cases/boundary/array_negative_lower_bound.case */
     size_t offset; //initialize for an offset to a variable
     if (a == NULL || !array_offset(a, index, &offset)) { //if a is NULL or if the index is invalid
-        return DT_ERR_RANGE; /*invalid input*/
+        return DT_ERR_RANGE; //invalid input
     }
-    a->elements[offset] = v; /*replace the element at the offset*/
+    a->elements[offset] = v; //replace the element at the offset
     return DT_OK;  // the purpose of this function is executed
 }

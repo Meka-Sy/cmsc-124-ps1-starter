@@ -84,11 +84,6 @@ dt_array *dt_array_new(size_t length, long long lower_bound)
     return a;
 }
 /*
- (void)length;
-    (void)lower_bound;
-    return NULL;
-    */
-/*
  * dt_array_free releases the element block and descriptor. It accepts NULL.
  * The environment owns the runtime objects referenced by the dt_value elements.
  */
@@ -105,11 +100,6 @@ void dt_array_free(dt_array *a)
     free(a); /*release the descriptor*/
 }
 /*
-(void)a;
-}
-*/
-
-/*
  * dt_array_len returns the stored element count in constant time.
  */
 size_t dt_array_len(const dt_array *a)
@@ -124,11 +114,7 @@ size_t dt_array_len(const dt_array *a)
     }
     return a->length; /*return the stored length*/
 }
-/*
-(void)a;
-    return 0;*/
-/*
- * dt_array_lower_bound returns the first array index. With lower bound 1,
+/* dt_array_lower_bound returns the first array index. With lower bound 1,
  * index 1 uses storage offset 0.
  */
 long long dt_array_lower_bound(const dt_array *a)
@@ -144,10 +130,6 @@ long long dt_array_lower_bound(const dt_array *a)
     }
     return a->lower_bound; /*return the stored lower bound*/
 }
-/*
- (void)a;
-    return 0;
-    */
 /*
  * dt_array_get writes the element at index to *out.
  * It returns DT_ERR_RANGE and does not change *out for an invalid index.
@@ -176,12 +158,6 @@ dt_status dt_array_get(const dt_array *a, long long index, dt_value *out)
     return DT_OK;
 }
 /*
-(void)a;
-    (void)index;
-    (void)out;
-    return DT_ERR_RANGE;
-*/
-/*
  * dt_array_set replaces the element at index with v.
  * It returns DT_ERR_RANGE and changes nothing for an invalid index.
  * The environment keeps ownership of the old value.
@@ -203,10 +179,3 @@ dt_status dt_array_set(dt_array *a, long long index, dt_value v)
     a->elements[offset] = v; /*replace the element at the offset*/
     return DT_OK;
 }
-
-/*
-(void)a;
-    (void)index;
-    (void)v;
-    return DT_ERR_RANGE;
-    */

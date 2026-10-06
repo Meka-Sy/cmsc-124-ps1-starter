@@ -29,7 +29,7 @@ struct dt_str {
  * dt_str_new copies the first `length` bytes. A zero byte is data. The function
  * returns NULL when allocation or size representation fails.
  */
-dt_str *dt_str_new(const char *bytes, size_t length) //implemented
+dt_str *dt_str_new(const char *bytes, size_t length) 
 {
     /* TODO: Reject SIZE_MAX because the buffer needs one terminator byte.
        Allocate the handle and buffer. Copy `length` bytes with memcpy.
@@ -37,26 +37,26 @@ dt_str *dt_str_new(const char *bytes, size_t length) //implemented
        dt_str_new("hello", 5)  -> a string whose dt_str_len is 5
        dt_str_new("a\0b", 3)   -> a string whose dt_str_len remains 3
        cases/normal/string_building.case, cases/capacity/embedded_zero_byte.case */
-       size_t capacity = length + 1; /*one extra byte for a terminator, length is the SIZE_MAX*/
-       if (capacity == 0) { /*reject SIZE_MAX because of the terminator*/
+       size_t capacity = length + 1; //one extra byte for the terminator, wraps to 0 if length is SIZE_MAX
+       if (capacity == 0) { //reject SIZE_MAX because of the terminator
            return NULL;
        }
 
         dt_str *s = malloc(sizeof(dt_str));
-         if (s == NULL) { /*allocation failure*/
+         if (s == NULL) { //allocation failure
               return NULL;
         }
-        s->bytes = malloc(capacity); /*data plus terminator*/
+        s->bytes = malloc(capacity); //data plus terminator
         if (s->bytes==NULL){
-            free(s); /*don't leak the handle  */
+            free(s); //don't leak the handle  
             return NULL;
         }
         if (length > 0) {
-            memcpy(s->bytes, bytes, length); /*copy the data*/
+            memcpy(s->bytes, bytes, length); //copy the data
         }
-        s->bytes[length] = '\0'; /*store a terminator after the data*/
-        s->length = length; /*store the length*/
-        s->capacity = capacity; /*store the capacity*/
+        s->bytes[length] = '\0'; //store a terminator after the data
+        s->length = length; //store the length*/
+        s->capacity = capacity; //store the capacity
         return s;
     
 }
@@ -64,7 +64,7 @@ dt_str *dt_str_new(const char *bytes, size_t length) //implemented
 /*
  * dt_str_free releases the buffer and handle. It accepts NULL.
  */
-void dt_str_free(dt_str *s) //implemented
+void dt_str_free(dt_str *s)
 {
     /* TODO: Release the buffer. Then release the handle. Accept NULL.
        dt_str_free(s)     -> the buffer and the handle are both released
@@ -78,7 +78,7 @@ void dt_str_free(dt_str *s) //implemented
 /*
  * dt_str_len returns the stored byte count in constant time.
  */
-size_t dt_str_len(const dt_str *s) //implemented
+size_t dt_str_len(const dt_str *s) 
 {
     /* TODO: Return the stored length. Do not scan the bytes.
        after `str new greeting "hello"` then `str append greeting ", world"`:
@@ -94,7 +94,7 @@ size_t dt_str_len(const dt_str *s) //implemented
  * dt_str_bytes returns the string bytes. Internal storage can include a final
  * zero byte. Callers must use dt_str_len with this pointer.
  */
-const char *dt_str_bytes(const dt_str *s) //implemented
+const char *dt_str_bytes(const dt_str *s)
 {
     /* TODO: Return the buffer. The caller uses it with dt_str_len.
        after `str new s "a\0b"`:
@@ -124,7 +124,7 @@ dt_status dt_str_append(dt_str *s, const char *bytes, size_t length)
         return DT_ERR_CAPACITY; /*invalid input*/
     }
     if (length > SIZE_MAX - 1 - s->length) {
-        return DT_ERR_CAPACITY; /*length + terminator would wrap*/
+        return DT_ERR_CAPACITY; //invalid input 
     }
 
     size_t new_length = s->length + length; 
@@ -177,7 +177,7 @@ dt_status dt_str_substr(const dt_str *s, size_t start, size_t length, dt_str **o
        an allocation failure           -> DT_ERR_CAPACITY, *out untouched
        cases/boundary/substr_exact_end.case, cases/boundary/substr_past_end.case */
     if (s == NULL || out == NULL) {
-        return DT_ERR_RANGE; //invalid input
+        return DT_ERR_RANGE; //invalid input, range error
     }
     size_t len = dt_str_len(s);
 
@@ -189,7 +189,7 @@ dt_status dt_str_substr(const dt_str *s, size_t start, size_t length, dt_str **o
         return DT_ERR_CAPACITY; //allocation failure
     }
     *out = result; //set the output pointer
-    return DT_OK; //
+    return DT_OK; //*out now holds the new substring
 
 }
 /*

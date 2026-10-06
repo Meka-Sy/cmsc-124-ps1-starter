@@ -9,8 +9,8 @@ toolchains, and local verification details for the work that the manual defines.
 
 Replace the two entries below. An assigned trio adds one entry.
 
-- Full Name (`@github-username`)
-- Full Name (`@github-username`)
+- Meka Synova Z. Melicor (`@Meka-Sy`)
+- Claire Dane D. Vincoy (`@cdvincoy`)
 
 ## Files You May Change
 

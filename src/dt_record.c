@@ -38,31 +38,31 @@ dt_record *dt_record_new(const char **field_names, size_t field_count)
        cases/capacity/record_over_fields.case */
        
     struct dt_record *record = malloc(sizeof(struct dt_record));
-    if (record == NULL) { //if record is NULL
-        return NULL;//return NULL 
+    if (record == NULL) { //allocation failed
+        return NULL;//report failure
     }
 
-    record->count = field_count;
-    if (field_count > DT_RECORD_MAX_FIELDS) { //if field is more than the maximum fields
-        free(record); //free the record to avoid memory leak
+    record->count = field_count; //remember how many fields this record has
+    if (field_count > DT_RECORD_MAX_FIELDS) { //more than DT_RECORD_MAX_FIELDS is not allowed 
+        free(record); //capacity exceeded, release the record we just allocated 
         return NULL; //return NULL 
     }
-    for (size_t i = 0; i < field_count; i++) { //loop through the fields
-        size_t len = strlen(field_names[i]) + 1;
-        record->names[i] = malloc(len);
-        if (record->names[i] == NULL) { /* handle failure, free earlier names */
-            //the cleanup code to free the previous allocated names and the record itself
-            for (size_t j = 0; j < i; j++) { //loop through the allocated names
-                free(record->names[j]); //free the allocated names
+    for (size_t i = 0; i < field_count; i++) { //goes through one field at a time 
+        size_t len = strlen(field_names[i]) + 1; //name length plus 1 byte for the '\0' terminator
+        record->names[i] = malloc(len); //allocate space for our own copy of the name
+        if (record->names[i] == NULL) { //allocation failed 
+            //undo everything allocated so far, then fail
+            for (size_t j = 0; j < i; j++) { //name[i] is NULL
+                free(record->names[j]); //free the copied names
             }
             free(record); //free the record 
-            return NULL; //return NULL
+            return NULL; //report failure
         }
-        memcpy(record->names[i], field_names[i], len);
-        record->values[i] = dt_value_nil();// this is the one that sets each field to nil
+        memcpy(record->names[i], field_names[i], len); //copy the name, including the '\0'
+        record->values[i] = dt_value_nil();//start the field as nil
     }
 
-    return record; //return the record
+    return record; //success, the record is returned
 }
 /*
  * dt_record_free releases the copied field names and the record.
@@ -91,7 +91,7 @@ size_t dt_record_field_count(const dt_record *r)
        after `rec new person name age`:  dt_record_field_count(person) -> 2
        cases/normal/record_basics.case */
     
-    return r->count; //return field count
+    return r->count; //return stored field count
 }
 /*
  * dt_record_field_name writes the field name at declaration position index to *out.
@@ -106,10 +106,10 @@ dt_status dt_record_field_name(const dt_record *r, size_t index, const char **ou
          dt_record_field_name(person, 0, &out)  -> DT_OK, *out = "name"
          dt_record_field_name(person, 2, &out)  -> DT_ERR_RANGE, *out untouched
        cases/normal/record_basics.case */
-    if (r == NULL || out == NULL ||index >= r->count) { //if r is NULL or out is NULL or index is out of bounds
+    if (r == NULL || out == NULL ||index >= r->count) { //invalid argument or index out of range
         return DT_ERR_RANGE; //retunrn DT_ERR_RANGE for invalid position
     }
-    *out = r->names[index]; //
+    *out = r->names[index]; // point *out at the stored name
     return DT_OK; //indicate that goal of the function is executed
 }
 /*
@@ -149,7 +149,7 @@ dt_status dt_record_set(dt_record *r, const char *field, dt_value v)
          the record still has only the fields "name" and "age"
        cases/normal/record_basics.case, cases/boundary/record_unknown_field.case */
     if (r == NULL || field == NULL) {
-        return DT_ERR_FIELD; //the field is absent or the record is NULL, return DT_ERR_FIELD
+        return DT_ERR_FIELD; //invalid argument or field absent
     }
     for (size_t i = 0; i < r->count; i++) { //loops through the fields
         if (strcmp(r->names[i], field) == 0) { //if statement if field's name matcheds the same name in r->names[i]

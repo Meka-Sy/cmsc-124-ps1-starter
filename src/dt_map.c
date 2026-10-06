@@ -21,7 +21,6 @@
 #include <string.h>
 
 struct dt_map {
-    // int placeholder; /* TODO: Add the buckets and insertion-order data. */
     // The map stores the keys, their values, and the links between entries.
     char **keys;
     dt_value *values;
@@ -65,7 +64,6 @@ dt_map *dt_map_new(void)
         m->buckets[i] = -1;
     }
     return m;
-    // return NULL;
 }
 
 /*
@@ -97,8 +95,6 @@ void dt_map_free(dt_map *m)
     free(m->buckets);
     free(m->order);
     free(m);                // Lastly, the map is freed.
-
-    // (void)m;
 }
 
 /*
@@ -116,8 +112,6 @@ size_t dt_map_len(const dt_map *m)
         return 0;
     }
     return m->len;          // len has the number of entries(keys)
-    // (void)m;
-    // return 0;
 }
 
 /*
@@ -208,7 +202,7 @@ dt_status dt_map_put(dt_map *m, const char *key, dt_value v)
 
     // This part adds a new key as entry.
     // Map creates its own copy of the key.
-    char *new_key = malloc(strlen(key) + 1);        // allocation
+    char *new_key = malloc(strlen(key) + 1);        // allocation for the key
 
     if(new_key == NULL){
         return DT_ERR_CAPACITY;
@@ -220,18 +214,13 @@ dt_status dt_map_put(dt_map *m, const char *key, dt_value v)
 
     m->keys[index] = new_key;                       // inserts the new_key to the keys
     m->values[index] = v;                           // inserts values
-    m->next[index] = m->buckets[bucket];            // adds a new link to the next
+    m->next[index] = m->buckets[bucket];            // adds a new link to the next for bucket entries
     m->buckets[bucket] = (int)index;                // makes the new entry the first entry in the bucket
 
     m->order[index] = new_key;                      // stores the key in the insertion order
     m->len++;                                       // increases the number of entries
 
     return DT_OK;
-
-    // (void)m;
-    // (void)key;
-    // (void)v;
-    // return DT_ERR_CAPACITY;
 }
 
 /*
@@ -273,12 +262,8 @@ dt_status dt_map_get(const dt_map *m, const char *key, dt_value *out)
         current = m->next[current];                          // Check the next entry in the same bucket
     }
 
+    // Returns an error because key is not stored in keys
     return DT_ERR_KEY;
- 
-       // (void)m;
-    // (void)key;
-    // (void)out;
-    // return DT_ERR_KEY;
 }
 
 /*
@@ -308,26 +293,29 @@ dt_status dt_map_remove(dt_map *m, const char *key)
 
     // Current is the entry stored in the bucket.
     int current = m->buckets[bucket];
+    // Previous keeps track of the entry before current
     int previous = -1;
 
+    // Checks for the same key
     while (current != -1){
-        if (strcmp(m->keys[current], key) == 0){
+        if (strcmp(m->keys[current], key) == 0){        // stops when the current entry matches the key
             break;
         }
-        previous = current;
-        current = m->next[current];
+        previous = current;                             // put current value into previous
+        current = m->next[current];                     // update current to acess the next value
     }
 
     if (current == -1){
         return DT_ERR_KEY;
     }
-
+  
     if (previous == -1){
-        m->buckets[bucket] = m->next[current];
+        m->buckets[bucket] = m->next[current];          // If current is the first entry, move the bucket to the next entry.
     } else {
-        m->next[previous] = m->next[current];
+        m->next[previous] = m->next[current];           // Otherwise, link the previous entry to the entry after current. 
     }
 
+    // Finds the key in the insertion order.
     for (size_t i=0; i<m->len; i++) {
         if (m->order[i] == m->keys[current]){
             for (size_t j=i; j+1 <m->len; j++){
@@ -337,20 +325,25 @@ dt_status dt_map_remove(dt_map *m, const char *key)
         }
     }
 
+    // Free the memory used by the removed key.
     free(m->keys[current]);
 
+    // Shift the entries to the left to fill the removed entry's position
     for (size_t i=(size_t)current; i+1<m->len; i++){
         m->keys[i] = m->keys[i+1];
         m->values[i] = m->values[i+1];
         m->next[i] = m->next[i+1];
     }
 
+    // Decrease the number of entries after removing one
     m->len--;
 
+    // Reset all buckets before rebuilding them
     for (size_t i = 0; i<m->bucket_count; i++){
         m->buckets[i] = -1;
     }
 
+    // Rebuild the bucket links using the updated entries
     for (size_t i=0; i<m->len; i++){
         unsigned long long new_hash = 14695981039346656037ULL;
     
@@ -360,16 +353,10 @@ dt_status dt_map_remove(dt_map *m, const char *key)
         }
 
         size_t new_bucket = new_hash%m->bucket_count;
-
         m->next[i] = m->buckets[new_bucket];
         m->buckets[new_bucket] = (int)i;
     }
     return DT_OK;
-    
-
-       // (void)m;
-    // (void)key;
-    // return DT_ERR_KEY;
 }
 
 /*
@@ -385,14 +372,11 @@ dt_status dt_map_key_at(const dt_map *m, size_t index, const char **out)
          dt_map_key_at(m, 0, &out)  -> DT_OK, *out = "alpha"
          dt_map_key_at(m, 3, &out)  -> DT_ERR_RANGE, *out untouched
        cases/normal/map_basics.case */
+    // Check if the requested position is outside the map
     if (index >= m->len){
         return DT_ERR_RANGE;
     }
+    // Get the key stored at this insertion position
     *out = m->order[index];
-
     return DT_OK;
-    // (void)m;
-    // (void)index;
-    // (void)out;
-    // return DT_ERR_RANGE;
 }

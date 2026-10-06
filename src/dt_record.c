@@ -36,33 +36,31 @@ dt_record *dt_record_new(const char **field_names, size_t field_count)
        nine fields                  -> NULL, and the driver reports DT_ERR_CAPACITY
        cases/normal/record_basics.case, cases/capacity/record_max_fields.case,
        cases/capacity/record_over_fields.case */
-    if (field_count > DT_RECORD_MAX_FIELDS) {
-        return NULL;
-    }
+
     struct dt_record *record = malloc(sizeof(struct dt_record));
-    if (record == NULL) {
-        return NULL;
+    if (record == NULL) { //if record is NULL
+        return NULL;//return NULL 
     }
 
     record->count = field_count;
-    if (field_count > DT_RECORD_MAX_FIELDS) {
-        free(record);
-        return NULL;
+    if (field_count > DT_RECORD_MAX_FIELDS) { //if field is more than the maximum fields
+        free(record); //free the record to avoid memory leak
+        return NULL; //return NULL 
     }
-    for (size_t i = 0; i < field_count; i++) {
-        record->names[i] = strdup(field_names[i]);
+    for (size_t i = 0; i < field_count; i++) { //loop through the fields
+        record->names[i] = strdup(field_names[i]); //copy each field name
         if (record->names[i] == NULL) {
             //the cleanup code to free the previous allocated names and the record itself
-            for (size_t j = 0; j < i; j++) {
-                free(record->names[j]);
+            for (size_t j = 0; j < i; j++) { //loop through the allocated names
+                free(record->names[j]); //free the allocated names
             }
-            free(record);
-            return NULL;
+            free(record); //free the record 
+            return NULL; //return NULL
         }
         record->values[i] = dt_value_nil();// this is the one that sets each field to nil
     }
 
-    return record;
+    return record; //return the record
 }
 /*
  * dt_record_free releases the copied field names and the record.
@@ -73,13 +71,13 @@ void dt_record_free(dt_record *r)
     /* TODO: Release the copied field names. Then release the record.
        a record holding a string value  -> the names go, the string stays
        dt_record_free(NULL)             -> returns, having done nothing */
-   if (r == NULL) {
+   if (r == NULL) { //if r is NULL, nothing is done
         return;
     }
-    for (size_t i = 0; i < r->count; i++) {
-        free(r->names[i]);
+    for (size_t i = 0; i < r->count; i++) { //loop through the field
+        free(r->names[i]); //free the field names
     }
-    free(r);
+    free(r); //free the record
 }
 /*
  * dt_record_field_count returns the stored field count in constant time.
@@ -91,7 +89,7 @@ size_t dt_record_field_count(const dt_record *r)
        after `rec new person name age`:  dt_record_field_count(person) -> 2
        cases/normal/record_basics.case */
     
-    return r->count;
+    return r->count; //return field count
 }
 /*
  * dt_record_field_name writes the field name at declaration position index to *out.
@@ -106,11 +104,11 @@ dt_status dt_record_field_name(const dt_record *r, size_t index, const char **ou
          dt_record_field_name(person, 0, &out)  -> DT_OK, *out = "name"
          dt_record_field_name(person, 2, &out)  -> DT_ERR_RANGE, *out untouched
        cases/normal/record_basics.case */
-    if (r == NULL || out == NULL ||index >= r->count) {
-        return DT_ERR_RANGE;
+    if (r == NULL || out == NULL ||index >= r->count) { //if r is NULL or out is NULL or index is out of bounds
+        return DT_ERR_RANGE; //retunrn DT_ERR_RANGE for invalid position
     }
-    *out = r->names[index];
-    return DT_OK;
+    *out = r->names[index]; //
+    return DT_OK; //indicate that goal of the function is executed
 }
 /*
  * dt_record_get writes the value of field to *out.
@@ -127,12 +125,12 @@ dt_status dt_record_get(const dt_record *r, const char *field, dt_value *out)
         return DT_ERR_FIELD;
     }
     for (size_t i = 0; i < r->count; i++) {
-        if (strcmp(r->names[i], field) == 0) {
-            *out = r->values[i];
-            return DT_OK;
+        if (strcmp(r->names[i], field) == 0) {//check if field is found
+            *out = r->values[i]; //write the value of the field to *out
+            return DT_OK;  //writing the value of the field to *out is successful
         }
     }
-    return DT_ERR_FIELD;
+    return DT_ERR_FIELD; //return DT_ERR_FIELD when the field is absent
 
 }
 /*
@@ -149,14 +147,13 @@ dt_status dt_record_set(dt_record *r, const char *field, dt_value v)
          the record still has only the fields "name" and "age"
        cases/normal/record_basics.case, cases/boundary/record_unknown_field.case */
     if (r == NULL || field == NULL) {
-        return DT_ERR_FIELD;
+        return DT_ERR_FIELD; //the field is absent or the record is NULL, return DT_ERR_FIELD
     }
-    for (size_t i = 0; i < r->count; i++) {
-        if (strcmp(r->names[i], field) == 0) {
-            r->values[i] = v;
-            return DT_OK;
+    for (size_t i = 0; i < r->count; i++) { //loops through the fields
+        if (strcmp(r->names[i], field) == 0) { //if statement if field's name matcheds the same name in r->names[i]
+            r->values[i] = v;//replace the value of the field with v
+            return DT_OK; //return DT_OK to indicate that the field was found then updated
         }
     }
-    return DT_ERR_FIELD;
-
+    return DT_ERR_FIELD; //return DT_ERR_FIELD if the field is not found
 }

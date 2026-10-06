@@ -27,7 +27,7 @@ bool dt_enum_is_valid(int ordinal)
        dt_enum_is_valid(3)   -> false, one past the set
        dt_enum_is_valid(-1)  -> false, below the lower bound */
 
-    if (ordinal >=0 && ordinal < DT_COLOR_COUNT){          // Instead of separate checking, checking a range is simpler to implement.
+    if (ordinal >=0 && ordinal < DT_COLOR_COUNT){    // Instead of separate checking, checking a range is simpler to implement.
     // 0-2 is the accepted range.
         return true;
     } else {
@@ -49,7 +49,7 @@ dt_status dt_enum_name(int ordinal, const char **out)
        dt_enum_name(3, &out)  -> DT_ERR_RANGE, *out untouched
        cases/normal/enum_names.case */
 
-    if (dt_enum_is_valid(ordinal)){                     // ordinal == "true", Validation checks if ordinal is within the range.
+    if (dt_enum_is_valid(ordinal)){         // ordinal == "true", Validation checks if ordinal is within the range.
             *out = COLOR_NAMES[ordinal];
             return DT_OK;
     } else {

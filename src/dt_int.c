@@ -45,10 +45,6 @@ dt_status dt_int_add(long long a, long long b, long long *out)
         *out = a + b;
         return DT_OK;
     }
-    // (void)a;
-    // (void)b;
-    // (void)out;
-    // return DT_ERR_OVERFLOW;
 }
 
 /*
@@ -75,10 +71,6 @@ dt_status dt_int_sub(long long a, long long b, long long *out)
         *out = a - b;
         return DT_OK;
     }
-    // (void)a;
-    // (void)b;
-    // (void)out;
-    // return DT_ERR_OVERFLOW;
 }
 
 /*
@@ -116,8 +108,4 @@ dt_status dt_int_mul(long long a, long long b, long long *out)
         *out = a * b;
         return DT_OK;
     } 
-    // (void)a;
-    // (void)b;
-    // (void)out;
-    // return DT_ERR_OVERFLOW;
 }

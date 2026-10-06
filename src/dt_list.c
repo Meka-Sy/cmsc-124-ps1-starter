@@ -67,10 +67,6 @@ dt_list *dt_list_cons(dt_value head, dt_list *tail)
 
 }
 /*
- (void)head;
-    (void)tail;
-    return NULL;*/
-/*
  * dt_list_free releases one cell and preserves its tail.
  * Another list can still reference the tail. The function accepts NULL.
  */
@@ -85,8 +81,6 @@ void dt_list_free(dt_list *l)
     }
 
 }
-/*
-(void)l;*/
 /*
  * dt_list_len counts the cells. It visits each cell once.
  */
@@ -103,9 +97,6 @@ size_t dt_list_len(const dt_list *l)
     }
     return n;
 }
-/*
-(void)l;
-    return 0;*/
 /*
  * dt_list_car writes the first cell value to *out.
  * It returns DT_ERR_EMPTY and does not change *out for an empty list.
@@ -124,7 +115,6 @@ dt_status dt_list_car(const dt_list *l, dt_value *out)
     *out = l->head;
     return DT_OK;
 }
-
 /*
  * dt_list_cdr writes the tail to *out. It returns DT_ERR_EMPTY for an empty
  * list. A one-element list has an empty tail and returns DT_OK.

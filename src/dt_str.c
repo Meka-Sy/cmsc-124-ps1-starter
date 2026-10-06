@@ -123,42 +123,40 @@ dt_status dt_str_append(dt_str *s, const char *bytes, size_t length)
     if (s == NULL || (bytes == NULL && length > 0)) {
         return DT_ERR_CAPACITY; /*invalid input*/
     }
-
-
     if (length > SIZE_MAX - 1 - s->length) {
         return DT_ERR_CAPACITY; /*length + terminator would wrap*/
     }
 
-    size_t new_length = s->length + length;
-    size_t needed = new_length + 1; /*new length plus terminator*/
+    size_t new_length = s->length + length; 
+    size_t needed = new_length + 1; //new length plus terminator/
 
-    if (needed > s->capacity) {
+    if (needed > s->capacity) { //if the new length plus terminator is greater than the capacity
         int aliased = (s->bytes != NULL && bytes >= s->bytes && bytes < s->bytes + s->capacity);
         size_t offset = aliased ? (size_t)(bytes - s->bytes):0;
 
-        size_t new_capacity = s->capacity;
-        while (new_capacity < needed) {
-            if (new_capacity > (SIZE_MAX - 1) / 2) {
-                new_capacity = needed; /*cannot double*/
+        size_t new_capacity = s->capacity; //assign new capacity 
+        while (new_capacity < needed) { //while new_capacity is less than needed capacity 
+            if (new_capacity > (SIZE_MAX - 1) / 2) { 
+                new_capacity = needed; //cannot double
                 break;
             }
             new_capacity = 2 * new_capacity + 1;
         }
         char *p = realloc(s->bytes, new_capacity);
         if (p == NULL) {
-            return DT_ERR_CAPACITY; /*allocation failure*/
+            return DT_ERR_CAPACITY; //allocation failure
         }
         s->bytes = p;
         s->capacity = new_capacity;
         if (aliased) {
-            bytes = s->bytes + offset; /*update pointer after realloc*/
+            bytes = s->bytes + offset; //update pointer after realloc
         }
     }
     if (length > 0) {
-        memcpy(s->bytes + s->length, bytes, length); /*copy the new bytes*/
+        memcpy(s->bytes + s->length, bytes, length); //copy the new bytes
     }
-    s->length = new_length; /*update the length*/
-    s->bytes[s->length] = '\0'; /*store the terminator*/
+    s->length = new_length; //update the length
+    s->bytes[s->length] = '\0'; //store the terminator
     return DT_OK;
 }
 /*
@@ -179,19 +177,19 @@ dt_status dt_str_substr(const dt_str *s, size_t start, size_t length, dt_str **o
        an allocation failure           -> DT_ERR_CAPACITY, *out untouched
        cases/boundary/substr_exact_end.case, cases/boundary/substr_past_end.case */
     if (s == NULL || out == NULL) {
-        return DT_ERR_RANGE; /*invalid input*/
+        return DT_ERR_RANGE; //invalid input
     }
     size_t len = dt_str_len(s);
 
     if( start > len || length > len - start) {
-        return DT_ERR_RANGE; /*requested range exceeds source*/
+        return DT_ERR_RANGE; //requested range exceeds source
     }
     dt_str *result= dt_str_new(dt_str_bytes(s) + start, length);
     if (result  == NULL) {
-        return DT_ERR_CAPACITY; /*allocation failure*/
+        return DT_ERR_CAPACITY; //allocation failure
     }
-    *out = result; /*set the output pointer*/
-    return DT_OK;
+    *out = result; //set the output pointer
+    return DT_OK; //
 
 }
 /*
@@ -207,13 +205,13 @@ bool dt_str_eq(const dt_str *a, const dt_str *b)
        "a\0b" and "a"       -> false because their lengths are 3 and 1
        cases/normal/string_building.case, cases/capacity/embedded_zero_byte.case */
     if (a == NULL || b == NULL) {
-        return false; /*invalid input*/
+        return false; //invalid input
     }
     if (dt_str_len(a) != dt_str_len(b)) {
-        return false; /*different lengths*/
+        return false; //different lengths
     }
     if (dt_str_len(a) == 0) {
-        return true; /*both are empty strings*/
+        return true; //both are empty strings
     }
-    return memcmp(dt_str_bytes(a), dt_str_bytes(b), dt_str_len(a)) == 0;
+    return memcmp(dt_str_bytes(a), dt_str_bytes(b), dt_str_len(a)) == 0; // return the boolean result
 }
